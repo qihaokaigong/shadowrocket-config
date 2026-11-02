@@ -18,11 +18,17 @@ production-ready.
 4. Connect Shadowrocket and keep the existing working node selected.
 5. Confirm the release ID in `main.conf` matches the published
    `metadata.json` version.
+6. In iOS Settings, enable Background App Refresh for Shadowrocket.
+7. In Shadowrocket's configuration auto-update settings, enable background
+   updates and start with the one-day interval.
+8. In Shadowrocket's On Demand settings, enable Always On only after the
+   functional checks below pass.
 
-The exact background refresh and On Demand controls vary by client version.
-Record their observed behavior before documenting an automatic refresh
-interval. A successful server deployment does not prove that the phone has
-loaded the new configuration.
+The exact labels for background refresh and On Demand vary by client version.
+Automatic background work also stops after iOS terminates the app or the phone
+restarts, until Shadowrocket is opened again. A successful server deployment
+does not prove that the phone has loaded the new configuration; confirm the
+release ID after each rollout.
 
 ## Functional checks
 

@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { isIP } from "node:net";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -74,4 +75,47 @@ export function domainMatches(rule, destination) {
   }
   if (rule.type === "DOMAIN-KEYWORD") return host.includes(rule.value);
   return false;
+}
+
+function ipv4Parts(value) {
+  return value.split(".").map((part) => Number.parseInt(part, 10));
+}
+
+function ipToBigInt(value) {
+  const version = isIP(value);
+  if (version === 4) {
+    return ipv4Parts(value).reduce((result, part) => (result << 8n) | BigInt(part), 0n);
+  }
+  if (version !== 6) return null;
+
+  const expandIpv4 = (part) => {
+    if (!part.includes(".")) return [part];
+    const bytes = ipv4Parts(part);
+    return [((bytes[0] << 8) | bytes[1]).toString(16), ((bytes[2] << 8) | bytes[3]).toString(16)];
+  };
+  const [leftRaw, rightRaw = ""] = value.split("::");
+  const left = leftRaw ? leftRaw.split(":").flatMap(expandIpv4) : [];
+  const right = rightRaw ? rightRaw.split(":").flatMap(expandIpv4) : [];
+  const missing = 8 - left.length - right.length;
+  const groups = [...left, ...Array.from({ length: missing }, () => "0"), ...right];
+  return groups.reduce((result, group) => (result << 16n) | BigInt(`0x${group || "0"}`), 0n);
+}
+
+export function ipMatches(rule, destination) {
+  const destinationVersion = isIP(destination);
+  const expectedVersion = rule.type === "IP-CIDR" ? 4 : rule.type === "IP-CIDR6" ? 6 : 0;
+  if (!expectedVersion || destinationVersion !== expectedVersion) return false;
+  const [network, prefixText] = rule.value.split("/");
+  const prefix = Number.parseInt(prefixText, 10);
+  const bits = expectedVersion === 4 ? 32 : 128;
+  if (!isIP(network) || !Number.isInteger(prefix) || prefix < 0 || prefix > bits) return false;
+  const shift = BigInt(bits - prefix);
+  return (ipToBigInt(destination) >> shift) === (ipToBigInt(network) >> shift);
+}
+
+export function ruleMatches(rule, destination) {
+  if (rule.type === "IP-CIDR" || rule.type === "IP-CIDR6") {
+    return ipMatches(rule, destination);
+  }
+  return isIP(destination) === 0 && domainMatches(rule, destination);
 }

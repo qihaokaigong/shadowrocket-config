@@ -4,6 +4,8 @@
     { "destination": "chatgpt.com", "expected": "PROXY" },
     { "destination": "ios.chat.openai.com", "expected": "PROXY" },
     { "destination": "files.oaiusercontent.com", "expected": "PROXY" },
+    { "destination": "challenges.cloudflare.com", "expected": "PROXY" },
+    { "destination": "humb.apple.com", "expected": "PROXY" },
     { "destination": "x.com", "expected": "PROXY" },
     { "destination": "video.twimg.com", "expected": "PROXY" },
     { "destination": "youtube.com", "expected": "PROXY" },
@@ -20,6 +22,11 @@
     { "destination": "www.bilibili.com", "expected": "DIRECT" },
     { "destination": "chatgpt.com.example.cn", "expected": "DIRECT" },
     { "destination": "router.asus.com", "expected": "DIRECT" },
+    { "destination": "192.168.1.1", "expected": "DIRECT" },
+    { "destination": "fc00::1", "expected": "DIRECT" },
+    { "destination": "1.0.1.1", "expected": "DIRECT" },
+    { "destination": "8.8.8.8", "expected": "PROXY" },
+    { "destination": "2001:4860:4860::8888", "expected": "PROXY" },
     { "destination": "unknown-overseas-example.org", "expected": "PROXY" },
     { "destination": "chatgpt.com.example.org", "expected": "PROXY" }
   ]

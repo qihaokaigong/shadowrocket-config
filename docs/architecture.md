@@ -35,6 +35,25 @@ This is destination-based routing. If two apps contact the same destination,
 they receive the same policy. iOS app identity is not part of this personal
 Shadowrocket configuration.
 
+## DNS and leak behavior
+
+- `DIRECT` domain rules use system DNS so mainland services retain local CDN
+  answers on both Wi-Fi and cellular networks.
+- Proxy destinations keep Shadowrocket's default remote-resolution behavior;
+  local host mappings are not applied to them.
+- Private DNS answers are accepted so routers and LAN services remain usable.
+- If the selected node does not support UDP relay, matched proxy traffic is
+  rejected rather than falling back to a direct connection.
+- HTTPS interception is disabled. The configuration does not install a CA or
+  decrypt application traffic.
+
+These defaults favor predictable routing. A phone acceptance test still has to
+confirm the selected node supports the protocols used by ChatGPT Voice and
+media-heavy apps.
+
+The explicit ChatGPT domains are based on OpenAI's maintained
+[network recommendations](https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps).
+
 ## Trust boundaries
 
 The repository publishes routing data only. It must never contain a proxy node,

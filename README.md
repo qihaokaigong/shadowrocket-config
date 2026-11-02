@@ -36,9 +36,14 @@ checks. Published rule files remain ordinary UTF-8 text for Shadowrocket.
 
 Before importing the configuration on a phone, verify that the local
 Shadowrocket version recognizes `PROXY` as the currently selected node policy.
-The initial DNS settings intentionally stay conservative until Wi-Fi and
-cellular testing establishes the correct split-DNS behavior for that client
-version.
+Direct destinations use the current network's system DNS; proxy destinations
+are resolved by the proxy path. If a proxy node cannot relay UDP, proxy traffic
+is rejected instead of silently leaking through `DIRECT`.
+
+The ChatGPT service rules track OpenAI's published
+[network allowlist](https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps).
+Other service exceptions remain deliberately narrow; the broad overseas
+fallback is still `FINAL,PROXY`.
 
 ## Cloudflare Pages settings
 
