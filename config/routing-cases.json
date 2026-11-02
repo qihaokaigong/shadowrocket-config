@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "cases": [
+    { "destination": "chatgpt.com", "expected": "PROXY" },
+    { "destination": "ios.chat.openai.com", "expected": "PROXY" },
+    { "destination": "files.oaiusercontent.com", "expected": "PROXY" },
+    { "destination": "x.com", "expected": "PROXY" },
+    { "destination": "video.twimg.com", "expected": "PROXY" },
+    { "destination": "youtube.com", "expected": "PROXY" },
+    { "destination": "r3---sn.example.googlevideo.com", "expected": "PROXY" },
+    { "destination": "facebook.com", "expected": "PROXY" },
+    { "destination": "static.xx.fbcdn.net", "expected": "PROXY" },
+    { "destination": "reddit.com", "expected": "PROXY" },
+    { "destination": "preview.redd.it", "expected": "PROXY" },
+    { "destination": "www.google.com", "expected": "PROXY" },
+    { "destination": "accounts.google.com", "expected": "PROXY" },
+    { "destination": "www.baidu.com", "expected": "DIRECT" },
+    { "destination": "www.qq.com", "expected": "DIRECT" },
+    { "destination": "www.taobao.com", "expected": "DIRECT" },
+    { "destination": "www.bilibili.com", "expected": "DIRECT" },
+    { "destination": "chatgpt.com.example.cn", "expected": "DIRECT" },
+    { "destination": "router.asus.com", "expected": "DIRECT" },
+    { "destination": "unknown-overseas-example.org", "expected": "PROXY" },
+    { "destination": "chatgpt.com.example.org", "expected": "PROXY" }
+  ]
+}

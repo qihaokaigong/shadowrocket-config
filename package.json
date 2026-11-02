@@ -1,0 +1,16 @@
+{
+  "name": "shadowrocket-config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "sync": "node scripts/sync.mjs",
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs",
+    "test": "npm run build && npm run check"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

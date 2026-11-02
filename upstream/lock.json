@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "id": "private",
+      "url": "https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/ruleset/private.txt",
+      "license": "GPL-3.0-only",
+      "sha256": "b3b73811228fb28440d848f1d0a94d49b78ed33a564e6d63c7335c7f19015515",
+      "lines": 132,
+      "snapshot_encoding": "gzip"
+    },
+    {
+      "id": "gfw",
+      "url": "https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/ruleset/gfw.txt",
+      "license": "GPL-3.0-only",
+      "sha256": "f05b506dc2634c9569a346f6e6488ed51be882209036585ef015f52a6fbee0ae",
+      "lines": 4451,
+      "snapshot_encoding": "gzip"
+    },
+    {
+      "id": "direct",
+      "url": "https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/ruleset/direct.txt",
+      "license": "GPL-3.0-only",
+      "sha256": "3c8af27208a26c462ae8a9f6ed310c21f5347660945f6a2ea95fdd400a2f8802",
+      "lines": 110189,
+      "snapshot_encoding": "gzip"
+    },
+    {
+      "id": "cncidr",
+      "url": "https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/ruleset/cncidr.txt",
+      "license": "GPL-3.0-only",
+      "sha256": "37d903e23363c598ea9a34ec6b0835226d480b41518f7df4b2d91f30de45ff53",
+      "lines": 10012,
+      "snapshot_encoding": "gzip"
+    }
+  ]
+}

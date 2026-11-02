@@ -1,0 +1,32 @@
+name: Check upstream rules
+
+on:
+  schedule:
+    - cron: "23 22 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm run sync
+      - run: npm test
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/upstream-rules
+          delete-branch: true
+          commit-message: "chore: refresh upstream routing rules"
+          title: "Refresh upstream routing rules"
+          body: |
+            Refreshes the pinned rule snapshots and content hashes.
+
+            The generated configuration and routing regression checks passed.

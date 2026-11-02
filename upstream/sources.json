@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "license_url": "https://raw.githubusercontent.com/Loyalsoldier/surge-rules/master/LICENSE",
+  "sources": [
+    {
+      "id": "private",
+      "url": "https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/ruleset/private.txt",
+      "license": "GPL-3.0-only",
+      "min_lines": 100,
+      "max_lines": 1000
+    },
+    {
+      "id": "gfw",
+      "url": "https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/ruleset/gfw.txt",
+      "license": "GPL-3.0-only",
+      "min_lines": 4000,
+      "max_lines": 20000
+    },
+    {
+      "id": "direct",
+      "url": "https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/ruleset/direct.txt",
+      "license": "GPL-3.0-only",
+      "min_lines": 50000,
+      "max_lines": 200000
+    },
+    {
+      "id": "cncidr",
+      "url": "https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/ruleset/cncidr.txt",
+      "license": "GPL-3.0-only",
+      "min_lines": 5000,
+      "max_lines": 30000
+    }
+  ]
+}
