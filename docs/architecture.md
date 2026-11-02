@@ -7,13 +7,17 @@ https://config.qihao.dev/shadowrocket/main.conf
 ```
 
 Every build derives a release ID from the base configuration, service rules,
-and pinned upstream hashes. The stable file references rule files under that
-release ID. This avoids mixing old and new rule files during a deployment and
-keeps the large mainland China lists out of the main configuration.
+and pinned upstream hashes. The stable file references rule files under stable
+`/shadowrocket/rules/` URLs. A phone holding a previously downloaded config
+can still fetch its referenced rules after the next deployment. The first
+published release used versioned URLs, so its original rule files are preserved
+in `archive/84148bc51e4d700f` and included in every deployment.
 
 Cloudflare Pages publishes the complete `dist/` directory as one deployment.
-The stable configuration and metadata revalidate on every request. Versioned
-rule files are immutable and may be cached for a year.
+The stable configuration, metadata, and current rules revalidate on every
+request. The preserved first-release URLs remain immutable. During a deployment,
+a client refreshing the config and rule files across the switch can briefly
+observe different revisions; a retry after deployment resolves this.
 
 ## Rule order
 

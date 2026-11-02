@@ -22,7 +22,8 @@ build environment:
 ```text
 GET /shadowrocket/main.conf       200, text/plain
 GET /shadowrocket/metadata.json   200, application/json
-GET /shadowrocket/releases/<version>/services.list  200, text/plain
+GET /shadowrocket/rules/services.list  200, text/plain
+GET /shadowrocket/releases/84148bc51e4d700f/services.list  200, text/plain
 GET /missing                      404, never an HTML application fallback with 200
 ```
 

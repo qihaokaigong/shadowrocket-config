@@ -4,6 +4,7 @@ import { parseRule, readJson, ROOT, ruleMatches, sha256 } from "./common.mjs";
 
 const metadata = await readJson("dist/shadowrocket/metadata.json");
 const cases = await readJson("config/routing-cases.json");
+const project = await readJson("config/project.json");
 const configPath = path.join(ROOT, "dist/shadowrocket/main.conf");
 const config = await readFile(configPath, "utf8");
 
@@ -39,19 +40,27 @@ for (const pattern of forbidden) {
   if (pattern.test(config)) throw new Error(`Published config contains forbidden material: ${pattern}`);
 }
 
-const releaseDirectory = path.join(ROOT, "dist/shadowrocket/releases", metadata.version);
+const legacyVersion = "84148bc51e4d700f";
+for (const file of ["private.list", "services.list", "gfw.list", "direct.list", "cncidr.list"]) {
+  const previous = await readFile(path.join(ROOT, "archive", legacyVersion, file));
+  const published = await readFile(path.join(ROOT, "dist/shadowrocket/releases", legacyVersion, file));
+  if (!previous.equals(published)) throw new Error(`Legacy rule changed: ${file}`);
+}
 const orderedRules = [];
 let finalPolicy;
 for (const mainRule of mainRules) {
   const fields = mainRule.split(",").map((field) => field.trim());
   if (fields[0] === "RULE-SET") {
     const url = new URL(fields[1]);
-    const expectedPrefix = `/shadowrocket/releases/${metadata.version}/`;
+    const expectedPrefix = "/shadowrocket/rules/";
     if (!url.pathname.startsWith(expectedPrefix)) {
-      throw new Error(`Rule set does not use the current immutable release: ${fields[1]}`);
+      throw new Error(`Rule set does not use the stable rule path: ${fields[1]}`);
+    }
+    if (url.origin !== new URL(project.public_base_url).origin) {
+      throw new Error(`Rule set uses an unexpected origin: ${fields[1]}`);
     }
     const file = path.basename(url.pathname);
-    const filePath = path.join(releaseDirectory, file);
+    const filePath = path.join(ROOT, "dist/shadowrocket/rules", file);
     await stat(filePath);
     const contents = await readFile(filePath, "utf8");
     for (const pattern of forbidden) {

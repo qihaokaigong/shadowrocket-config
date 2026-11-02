@@ -9,6 +9,8 @@
     { "destination": "x.com", "expected": "PROXY" },
     { "destination": "video.twimg.com", "expected": "PROXY" },
     { "destination": "youtube.com", "expected": "PROXY" },
+    { "destination": "ggpht.cn", "expected": "PROXY" },
+    { "destination": "lh3.ggpht.cn", "expected": "PROXY" },
     { "destination": "r3---sn.example.googlevideo.com", "expected": "PROXY" },
     { "destination": "facebook.com", "expected": "PROXY" },
     { "destination": "static.xx.fbcdn.net", "expected": "PROXY" },

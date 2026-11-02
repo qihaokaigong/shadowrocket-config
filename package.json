@@ -8,6 +8,7 @@
     "sync": "node scripts/sync.mjs",
     "build": "node scripts/build.mjs",
     "check": "node scripts/check.mjs",
+    "check:live": "node scripts/verify-live.mjs",
     "test": "npm run build && npm run check"
   },
   "engines": {

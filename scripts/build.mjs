@@ -1,4 +1,4 @@
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { gunzipSync } from "node:zlib";
 import { addNoResolve, normalizeRuleText, readJson, ROOT, sha256 } from "./common.mjs";
@@ -32,9 +32,18 @@ const releaseSeed = JSON.stringify({
 });
 const version = sha256(releaseSeed).slice(0, 16);
 const output = path.join(ROOT, "dist");
-const releaseDirectory = path.join(output, "shadowrocket", "releases", version);
+const releaseDirectory = path.join(output, "shadowrocket", "rules");
 await rm(output, { recursive: true, force: true });
 await mkdir(releaseDirectory, { recursive: true });
+
+// Keep the first published immutable URLs alive for phones that have not yet
+// refreshed main.conf. Future configs use revalidating stable rule URLs.
+const legacyVersion = "84148bc51e4d700f";
+const legacyDirectory = path.join(output, "shadowrocket", "releases", legacyVersion);
+await mkdir(legacyDirectory, { recursive: true });
+for (const file of ["private.list", "services.list", "gfw.list", "direct.list", "cncidr.list"]) {
+  await copyFile(path.join(ROOT, "archive", legacyVersion, file), path.join(legacyDirectory, file));
+}
 
 await writeFile(path.join(releaseDirectory, "private.list"), snapshots.private, "utf8");
 await writeFile(path.join(releaseDirectory, "services.list"), serviceText, "utf8");
@@ -46,7 +55,7 @@ await writeFile(
   "utf8",
 );
 
-const releaseUrl = `${project.public_base_url}/releases/${version}`;
+const releaseUrl = `${project.public_base_url}/rules`;
 const config = `${baseConfig}
 
 [Rule]
@@ -88,7 +97,7 @@ const metadata = {
 await writeFile(path.join(configDirectory, "metadata.json"), `${JSON.stringify(metadata, null, 2)}\n`, "utf8");
 await writeFile(
   path.join(output, "_headers"),
-  `/shadowrocket/main.conf\n  Content-Type: text/plain; charset=utf-8\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n\n/shadowrocket/metadata.json\n  Content-Type: application/json; charset=utf-8\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n\n/shadowrocket/releases/*\n  Content-Type: text/plain; charset=utf-8\n  Cache-Control: public, max-age=31536000, immutable\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n`,
+  `/shadowrocket/main.conf\n  Content-Type: text/plain; charset=utf-8\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n\n/shadowrocket/metadata.json\n  Content-Type: application/json; charset=utf-8\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n\n/shadowrocket/rules/*\n  Content-Type: text/plain; charset=utf-8\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n\n/shadowrocket/releases/*\n  Content-Type: text/plain; charset=utf-8\n  Cache-Control: public, max-age=31536000, immutable\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n`,
   "utf8",
 );
 await writeFile(
