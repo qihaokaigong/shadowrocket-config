@@ -5,8 +5,8 @@ Rule list URL: `https://config.qihao.dev/switchy/rules.txt`
 This file uses `[SwitchyOmega Conditions]` with `@with result`. It is separate
 from the Shadowrocket configuration and cannot be imported as a proxy server.
 
-1. In ZeroOmega, create a proxy profile named exactly `Proxy` and point it at a
-   working HTTP or SOCKS5 proxy on this computer. The list uses ZeroOmega's
+1. Use the existing proxy profile named exactly `proxy_us` and confirm it works
+   when selected on its own. Point it at a working HTTP or SOCKS5 proxy on this computer. The list uses ZeroOmega's
    built-in `direct` profile for direct connections.
 2. Create a Rule List profile, choose the SwitchyOmega/Switchy format, and use
    the URL above as its source. Apply changes and select this profile.
@@ -15,9 +15,9 @@ from the Shadowrocket configuration and cannot be imported as a proxy server.
 
 The list is intentionally small: explicit overseas service domains are first;
 `.cn` and a curated set of mainland services are direct; everything else uses
-`Proxy`. Add missing direct domains to `config/switchy-direct.json` after
+`proxy_us`. Add missing direct domains to `config/switchy-direct.json` after
 checking the extension's active decision. This browser-only list does not have
 Shadowrocket's China GeoIP and IP CIDR rules, and does not route other apps.
 
 No proxy credentials, server addresses, or node subscriptions are published
-in this public rule list. The profile named `Proxy` remains local to ZeroOmega.
+in this public rule list. The profile named `proxy_us` remains local to ZeroOmega.

@@ -39,7 +39,7 @@ await get(`missing-${Date.now()}`, 404);
 const switchy = await (await fetch(new URL("/switchy/rules.txt", base), {
   signal: AbortSignal.timeout(15_000), cache: "no-store",
 })).text();
-if (!switchy.startsWith("[SwitchyOmega Conditions]\n@with result\n") || !switchy.trimEnd().endsWith("* +Proxy")) {
+if (!switchy.startsWith("[SwitchyOmega Conditions]\n@with result\n") || !switchy.trimEnd().endsWith("* +proxy_us")) {
   throw new Error("Live SwitchyOmega rule list is missing or invalid");
 }
 console.log(`Live release ${metadata.version}: Shadowrocket rules, SwitchyOmega list, legacy rules, and 404 passed.`);

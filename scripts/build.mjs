@@ -95,7 +95,7 @@ await writeFile(path.join(configDirectory, "main.conf"), config, "utf8");
 const switchyLines = [
   "[SwitchyOmega Conditions]",
   "@with result",
-  "; The proxy profile in ZeroOmega must be named Proxy.",
+  "; The proxy profile in ZeroOmega must be named proxy_us.",
   "; First match wins. Explicit overseas services precede *.cn.",
   "localhost +direct",
   "*.localhost +direct",
@@ -119,12 +119,12 @@ function addHost(host, policy, suffix = true) {
 for (const rules of Object.values(services.services)) {
   for (const line of rules) {
     const [type, host] = line.split(",");
-    if (type === "DOMAIN" || type === "DOMAIN-SUFFIX") addHost(host, "Proxy", type === "DOMAIN-SUFFIX");
+    if (type === "DOMAIN" || type === "DOMAIN-SUFFIX") addHost(host, "proxy_us", type === "DOMAIN-SUFFIX");
   }
 }
 addHost("cn", "direct");
 for (const host of switchyDirect.domains) addHost(host, "direct");
-switchyLines.push("* +Proxy");
+switchyLines.push("* +proxy_us");
 await mkdir(path.join(output, "switchy"), { recursive: true });
 await writeFile(path.join(output, "switchy", "rules.txt"), `${switchyLines.join("\n")}\n`, "utf8");
 const metadata = {

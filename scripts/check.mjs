@@ -103,10 +103,10 @@ const switchyLines = switchy.trimEnd().split("\n");
 if (switchyLines[0] !== "[SwitchyOmega Conditions]" || switchyLines[1] !== "@with result") {
   throw new Error("Invalid SwitchyOmega conditions header");
 }
-if (switchyLines.at(-1) !== "* +Proxy") throw new Error("Switchy default must be Proxy");
+if (switchyLines.at(-1) !== "* +proxy_us") throw new Error("Switchy default must be proxy_us");
 const switchyRules = switchyLines.slice(2).filter((line) => !line.startsWith(";"));
 for (const line of switchyRules) {
-  if (!/^(?:\*|(?:\*\.)?[a-z0-9.-]+) \+(?:Proxy|direct)$/.test(line)) {
+  if (!/^(?:\*|(?:\*\.)?[a-z0-9.-]+) \+(?:proxy_us|direct)$/.test(line)) {
     throw new Error(`Invalid SwitchyOmega condition: ${line}`);
   }
 }
@@ -120,10 +120,11 @@ function switchyRoute(host) {
   throw new Error(`No Switchy match: ${host}`);
 }
 for (const [host, expected] of [
-  ["chatgpt.com", "Proxy"], ["sub.chatgpt.com", "Proxy"],
-  ["ggpht.cn", "Proxy"], ["lh3.ggpht.cn", "Proxy"],
+  ["chatgpt.com", "proxy_us"], ["sub.chatgpt.com", "proxy_us"],
+  ["x.com", "proxy_us"], ["api.x.com", "proxy_us"],
+  ["ggpht.cn", "proxy_us"], ["lh3.ggpht.cn", "proxy_us"],
   ["baidu.com", "direct"], ["www.taobao.com", "direct"],
-  ["www.example.cn", "direct"], ["unknown-overseas.org", "Proxy"],
+  ["www.example.cn", "direct"], ["unknown-overseas.org", "proxy_us"],
   ["localhost", "direct"],
 ]) {
   if (switchyRoute(host) !== expected) throw new Error(`Switchy route mismatch: ${host}`);
