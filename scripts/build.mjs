@@ -5,7 +5,6 @@ import { addNoResolve, normalizeRuleText, readJson, ROOT, sha256 } from "./commo
 
 const project = await readJson("config/project.json");
 const services = await readJson("config/services.json");
-const switchyDirect = await readJson("config/switchy-direct.json");
 const lock = await readJson("upstream/lock.json");
 const baseConfig = (await readFile(path.join(ROOT, "config/base.conf"), "utf8")).trimEnd();
 
@@ -90,28 +89,22 @@ const configDirectory = path.join(output, "shadowrocket");
 await writeFile(path.join(configDirectory, "main.conf"), config, "utf8");
 
 // ZeroOmega expects SwitchyOmega conditions, not Shadowrocket RULE-SET syntax.
-// Keep this browser list intentionally small; Chrome does not support our
-// Shadowrocket GEOIP/CN-IP fallback in a host-based switch profile.
+// Keep routing outcomes in ZeroOmega's UI: matching rules use its selected
+// proxy profile and unmatched requests use its selected direct profile.
 const switchyLines = [
   "[SwitchyOmega Conditions]",
-  "@with result",
-  "; The proxy profile in ZeroOmega must be named proxy_us.",
-  "; First match wins. Explicit overseas services precede *.cn.",
-  "localhost +direct",
-  "*.localhost +direct",
-  "*.local +direct",
-  "*.lan +direct",
-  "*.home.arpa +direct",
+  "; Matching rules use the profile selected in ZeroOmega's Rule list rules row.",
+  "; Unmatched requests use the profile selected in ZeroOmega's Default row.",
 ];
 const emitted = new Set();
-function addHost(host, policy, suffix = true) {
+function addHost(host, suffix = true) {
   const normalized = host.toLowerCase();
   if (!/^[a-z0-9.-]+$/.test(normalized) || normalized.startsWith(".") || normalized.endsWith(".")) {
     throw new Error(`Invalid Switchy domain: ${host}`);
   }
   for (const pattern of suffix ? [normalized, `*.${normalized}`] : [normalized]) {
     if (!emitted.has(pattern)) {
-      switchyLines.push(`${pattern} +${policy}`);
+      switchyLines.push(pattern);
       emitted.add(pattern);
     }
   }
@@ -119,12 +112,14 @@ function addHost(host, policy, suffix = true) {
 for (const rules of Object.values(services.services)) {
   for (const line of rules) {
     const [type, host] = line.split(",");
-    if (type === "DOMAIN" || type === "DOMAIN-SUFFIX") addHost(host, "proxy_us", type === "DOMAIN-SUFFIX");
+    if (type === "DOMAIN" || type === "DOMAIN-SUFFIX") addHost(host, type === "DOMAIN-SUFFIX");
   }
 }
-addHost("cn", "direct");
-for (const host of switchyDirect.domains) addHost(host, "direct");
-switchyLines.push("* +proxy_us");
+for (const line of snapshots.gfw.trimEnd().split("\n")) {
+  const [type, host] = line.split(",");
+  if (type !== "DOMAIN-SUFFIX") throw new Error(`Unexpected GFW rule for Switchy: ${line}`);
+  addHost(host);
+}
 await mkdir(path.join(output, "switchy"), { recursive: true });
 await writeFile(path.join(output, "switchy", "rules.txt"), `${switchyLines.join("\n")}\n`, "utf8");
 const metadata = {

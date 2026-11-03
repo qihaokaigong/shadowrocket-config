@@ -100,32 +100,30 @@ if (failures.length) throw new Error(`Routing regressions:\n${failures.join("\n"
 
 const switchy = await readFile(path.join(ROOT, "dist/switchy/rules.txt"), "utf8");
 const switchyLines = switchy.trimEnd().split("\n");
-if (switchyLines[0] !== "[SwitchyOmega Conditions]" || switchyLines[1] !== "@with result") {
+if (switchyLines[0] !== "[SwitchyOmega Conditions]" || switchyLines.includes("@with result")) {
   throw new Error("Invalid SwitchyOmega conditions header");
 }
-if (switchyLines.at(-1) !== "* +proxy_us") throw new Error("Switchy default must be proxy_us");
-const switchyRules = switchyLines.slice(2).filter((line) => !line.startsWith(";"));
+const switchyRules = switchyLines.slice(1).filter((line) => !line.startsWith(";") && line);
 for (const line of switchyRules) {
-  if (!/^(?:\*|(?:\*\.)?[a-z0-9.-]+) \+(?:proxy_us|direct)$/.test(line)) {
+  if (!/^(?:\*\.)?[a-z0-9.-]+$/.test(line)) {
     throw new Error(`Invalid SwitchyOmega condition: ${line}`);
   }
 }
 function switchyRoute(host) {
-  for (const line of switchyRules) {
-    const [pattern, policy] = line.split(" +");
-    if (pattern === "*" || pattern === host || (pattern.startsWith("*.") && host.endsWith(pattern.slice(1)))) {
-      return policy;
+  for (const pattern of switchyRules) {
+    if (pattern === host || (pattern.startsWith("*.") && host.endsWith(pattern.slice(1)))) {
+      return "PROXY";
     }
   }
-  throw new Error(`No Switchy match: ${host}`);
+  return "DIRECT";
 }
 for (const [host, expected] of [
-  ["chatgpt.com", "proxy_us"], ["sub.chatgpt.com", "proxy_us"],
-  ["x.com", "proxy_us"], ["api.x.com", "proxy_us"],
-  ["ggpht.cn", "proxy_us"], ["lh3.ggpht.cn", "proxy_us"],
-  ["baidu.com", "direct"], ["www.taobao.com", "direct"],
-  ["www.example.cn", "direct"], ["unknown-overseas.org", "proxy_us"],
-  ["localhost", "direct"],
+  ["chatgpt.com", "PROXY"], ["sub.chatgpt.com", "PROXY"],
+  ["x.com", "PROXY"], ["api.x.com", "PROXY"],
+  ["ggpht.cn", "PROXY"], ["lh3.ggpht.cn", "PROXY"],
+  ["baidu.com", "DIRECT"], ["www.taobao.com", "DIRECT"],
+  ["www.example.cn", "DIRECT"], ["unknown-overseas.org", "DIRECT"],
+  ["localhost", "DIRECT"],
 ]) {
   if (switchyRoute(host) !== expected) throw new Error(`Switchy route mismatch: ${host}`);
 }
