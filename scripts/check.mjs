@@ -98,6 +98,37 @@ for (const testCase of cases.cases) {
 }
 if (failures.length) throw new Error(`Routing regressions:\n${failures.join("\n")}`);
 
+const switchy = await readFile(path.join(ROOT, "dist/switchy/rules.txt"), "utf8");
+const switchyLines = switchy.trimEnd().split("\n");
+if (switchyLines[0] !== "[SwitchyOmega Conditions]" || switchyLines[1] !== "@with result") {
+  throw new Error("Invalid SwitchyOmega conditions header");
+}
+if (switchyLines.at(-1) !== "* +Proxy") throw new Error("Switchy default must be Proxy");
+const switchyRules = switchyLines.slice(2).filter((line) => !line.startsWith(";"));
+for (const line of switchyRules) {
+  if (!/^(?:\*|(?:\*\.)?[a-z0-9.-]+) \+(?:Proxy|direct)$/.test(line)) {
+    throw new Error(`Invalid SwitchyOmega condition: ${line}`);
+  }
+}
+function switchyRoute(host) {
+  for (const line of switchyRules) {
+    const [pattern, policy] = line.split(" +");
+    if (pattern === "*" || pattern === host || (pattern.startsWith("*.") && host.endsWith(pattern.slice(1)))) {
+      return policy;
+    }
+  }
+  throw new Error(`No Switchy match: ${host}`);
+}
+for (const [host, expected] of [
+  ["chatgpt.com", "Proxy"], ["sub.chatgpt.com", "Proxy"],
+  ["ggpht.cn", "Proxy"], ["lh3.ggpht.cn", "Proxy"],
+  ["baidu.com", "direct"], ["www.taobao.com", "direct"],
+  ["www.example.cn", "direct"], ["unknown-overseas.org", "Proxy"],
+  ["localhost", "direct"],
+]) {
+  if (switchyRoute(host) !== expected) throw new Error(`Switchy route mismatch: ${host}`);
+}
+
 console.log(
   `Validated release ${metadata.version}: ${orderedRules.length} remote rules and ${cases.cases.length} routing cases.`,
 );

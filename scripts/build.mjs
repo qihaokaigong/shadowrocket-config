@@ -5,6 +5,7 @@ import { addNoResolve, normalizeRuleText, readJson, ROOT, sha256 } from "./commo
 
 const project = await readJson("config/project.json");
 const services = await readJson("config/services.json");
+const switchyDirect = await readJson("config/switchy-direct.json");
 const lock = await readJson("upstream/lock.json");
 const baseConfig = (await readFile(path.join(ROOT, "config/base.conf"), "utf8")).trimEnd();
 
@@ -87,6 +88,45 @@ enable = false
 
 const configDirectory = path.join(output, "shadowrocket");
 await writeFile(path.join(configDirectory, "main.conf"), config, "utf8");
+
+// ZeroOmega expects SwitchyOmega conditions, not Shadowrocket RULE-SET syntax.
+// Keep this browser list intentionally small; Chrome does not support our
+// Shadowrocket GEOIP/CN-IP fallback in a host-based switch profile.
+const switchyLines = [
+  "[SwitchyOmega Conditions]",
+  "@with result",
+  "; The proxy profile in ZeroOmega must be named Proxy.",
+  "; First match wins. Explicit overseas services precede *.cn.",
+  "localhost +direct",
+  "*.localhost +direct",
+  "*.local +direct",
+  "*.lan +direct",
+  "*.home.arpa +direct",
+];
+const emitted = new Set();
+function addHost(host, policy, suffix = true) {
+  const normalized = host.toLowerCase();
+  if (!/^[a-z0-9.-]+$/.test(normalized) || normalized.startsWith(".") || normalized.endsWith(".")) {
+    throw new Error(`Invalid Switchy domain: ${host}`);
+  }
+  for (const pattern of suffix ? [normalized, `*.${normalized}`] : [normalized]) {
+    if (!emitted.has(pattern)) {
+      switchyLines.push(`${pattern} +${policy}`);
+      emitted.add(pattern);
+    }
+  }
+}
+for (const rules of Object.values(services.services)) {
+  for (const line of rules) {
+    const [type, host] = line.split(",");
+    if (type === "DOMAIN" || type === "DOMAIN-SUFFIX") addHost(host, "Proxy", type === "DOMAIN-SUFFIX");
+  }
+}
+addHost("cn", "direct");
+for (const host of switchyDirect.domains) addHost(host, "direct");
+switchyLines.push("* +Proxy");
+await mkdir(path.join(output, "switchy"), { recursive: true });
+await writeFile(path.join(output, "switchy", "rules.txt"), `${switchyLines.join("\n")}\n`, "utf8");
 const metadata = {
   schema_version: 1,
   version,
@@ -97,7 +137,7 @@ const metadata = {
 await writeFile(path.join(configDirectory, "metadata.json"), `${JSON.stringify(metadata, null, 2)}\n`, "utf8");
 await writeFile(
   path.join(output, "_headers"),
-  `/shadowrocket/main.conf\n  Content-Type: text/plain; charset=utf-8\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n\n/shadowrocket/metadata.json\n  Content-Type: application/json; charset=utf-8\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n\n/shadowrocket/rules/*\n  Content-Type: text/plain; charset=utf-8\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n\n/shadowrocket/releases/*\n  Content-Type: text/plain; charset=utf-8\n  Cache-Control: public, max-age=31536000, immutable\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n`,
+  `/shadowrocket/main.conf\n  Content-Type: text/plain; charset=utf-8\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n\n/shadowrocket/metadata.json\n  Content-Type: application/json; charset=utf-8\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n\n/shadowrocket/rules/*\n  Content-Type: text/plain; charset=utf-8\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n\n/shadowrocket/releases/*\n  Content-Type: text/plain; charset=utf-8\n  Cache-Control: public, max-age=31536000, immutable\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n\n/switchy/rules.txt\n  Content-Type: text/plain; charset=utf-8\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  X-Robots-Tag: noindex, nofollow\n`,
   "utf8",
 );
 await writeFile(

@@ -36,4 +36,10 @@ for (const file of ["private.list", "services.list", "gfw.list", "direct.list", 
   if (!(await response.text()).trim()) throw new Error(`Empty legacy rule: ${file}`);
 }
 await get(`missing-${Date.now()}`, 404);
-console.log(`Live release ${metadata.version}: config, five current rules, five legacy rules, and 404 passed.`);
+const switchy = await (await fetch(new URL("/switchy/rules.txt", base), {
+  signal: AbortSignal.timeout(15_000), cache: "no-store",
+})).text();
+if (!switchy.startsWith("[SwitchyOmega Conditions]\n@with result\n") || !switchy.trimEnd().endsWith("* +Proxy")) {
+  throw new Error("Live SwitchyOmega rule list is missing or invalid");
+}
+console.log(`Live release ${metadata.version}: Shadowrocket rules, SwitchyOmega list, legacy rules, and 404 passed.`);

@@ -16,9 +16,12 @@ The stable client URL is designed to be:
 https://config.qihao.dev/shadowrocket/main.conf
 ```
 
-The generated main configuration references immutable rule URLs under the same
-release version. A Cloudflare Pages deployment publishes all files atomically,
-while `main.conf` and `metadata.json` always revalidate.
+The generated main configuration references stable rule URLs that revalidate.
+The first published version's immutable URLs remain available for older phone
+configs. A Cloudflare Pages deployment publishes all files atomically.
+
+ZeroOmega's separate SwitchyOmega rule list is published at
+`https://config.qihao.dev/switchy/rules.txt`. See [browser setup](docs/switchy.md).
 
 ## Local workflow
 
